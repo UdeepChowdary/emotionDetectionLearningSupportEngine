@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
 from src.database import init_db, get_db, User, Emotion_Record
 from sqlalchemy.orm import Session
 
@@ -93,8 +93,7 @@ def load_models():
 def setup_gemini():
     api_key = os.getenv('GOOGLE_API_KEY') or os.getenv('GEMINI_API_KEY', '')
     if api_key:
-        genai.configure(api_key=api_key)
-        return genai.GenerativeModel('gemini-2.0-flash')
+        return genai.Client(api_key=api_key)
     return None
 
 
@@ -115,7 +114,10 @@ def get_gemini_response(model_gemini, field: str, problem: str, emotion: str, co
         
         Use simple, clear language. Keep each point to 1-2 sentences. No markdown formatting.
         """
-        response = model_gemini.generate_content(prompt)
+        response = model_gemini.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt
+        )
         return response.text.strip()
     except Exception as e:
         return f"AI response unavailable: {e}"
@@ -542,17 +544,22 @@ def main():
         problem_text = st.text_area(
             f"Describe your {field} problem or challenge:",
             placeholder=f"e.g., 'I'm struggling with algorithms in {field}' or 'This concept is confusing'",
-            height=120
+            height=120,
+            key="problem_input"
         )
         
         st.write("**Quick Examples:**")
         ex1, ex2, ex3 = st.columns(3)
+        
+        def set_example(text):
+            st.session_state.problem_input = text
+            
         with ex1:
-            st.button("I'm confused about recursion", use_container_width=True)
+            st.button("I'm confused about recursion", on_click=set_example, args=("I'm confused about recursion",), use_container_width=True)
         with ex2:
-            st.button("Debugging is frustrating", use_container_width=True)
+            st.button("Debugging is frustrating", on_click=set_example, args=("Debugging is frustrating",), use_container_width=True)
         with ex3:
-            st.button("I'm curious about machine learning", use_container_width=True)
+            st.button("I'm curious about machine learning", on_click=set_example, args=("I'm curious about machine learning",), use_container_width=True)
 
     with col2:
         st.subheader("⚙️ Settings")

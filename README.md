@@ -1,6 +1,17 @@
 # 🧠 Emotion Detection & Learning Support Engine
 
-An AI-powered Streamlit web application that detects a student's emotional state from their study challenge description and delivers personalized, empathetic learning support using **BiLSTM**, **BERT**, and **Gemini AI**.
+<div align="center">
+  
+  [![Python](https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+  [![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io/)
+  [![HuggingFace](https://img.shields.io/badge/BERT-HuggingFace-F1E05A?style=for-the-badge&logo=huggingface&logoColor=black)](https://huggingface.co/)
+  [![Gemini](https://img.shields.io/badge/Gemini_2.5_Flash-Google_AI-4285F4?style=for-the-badge&logo=googlegemini&logoColor=white)](https://ai.google.dev/)
+  [![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+
+  <p align="center">
+    <strong>An AI-powered Streamlit web application that detects a student's emotional state from their study challenge description and delivers personalized, empathetic learning support using BiLSTM, BERT, and Gemini AI.</strong>
+  </p>
+</div>
 
 ---
 
@@ -8,115 +19,133 @@ An AI-powered Streamlit web application that detects a student's emotional state
 
 ```
 emotion-detection/
-├── .env
-├── .gitignore
-├── app.py
-├── requirements.txt
-├── README.md
-├── emotion_response_examples.csv        ← auto-created at runtime
-├── emotion_response_mapping.csv         ← auto-created at runtime
-├── data/
-│   └── emotion_text_dataset.csv         ← created by Kaggle notebook
-├── models/
-│   ├── bltsm/
-│   │   ├── bilstm_student_adaptive.keras
-│   │   ├── tokenizer.pkl
-│   │   └── label_classes.npy
-│   └── bert_emotion_model_final/
-│       ├── config.json
-│       ├── model.safetensors
-│       ├── tokenizer.json
-│       ├── tokenizer_config.json
-│       ├── special_tokens_map.json
-│       └── label_mapping.json
-├── notebooks/
-│   └── kaggle_training.ipynb
-└── src/
-    ├── __init__.py
-    ├── preprocessing.py
-    ├── model.py
-    ├── bert_model.py
-    └── predict.py
+├── documentation/                   ← Additional project documentation
+├── project files/                   ← Main code & assets directory
+│   ├── .env                         ← Local environment variables (API keys)
+│   ├── .venv/                       ← Virtual environment folder
+│   ├── app.py                       ← Streamlit Web Application entrypoint
+│   ├── requirements.txt             ← Project dependencies
+│   ├── emotion_response_examples.csv ← Saved history (auto-created at runtime)
+│   ├── emotion_response_mapping.csv  ← Emotion responses (auto-created at runtime)
+│   ├── data/
+│   │   └── emotion_text_dataset.csv  ← Dataset created by Kaggle notebook
+│   ├── models/
+│   │   ├── bltsm/
+│   │   │   ├── bilstm_student_adaptive.keras
+│   │   │   ├── tokenizer.pkl
+│   │   │   └── label_classes.npy
+│   │   └── bert_emotion_model_final/
+│   │       ├── config.json
+│   │       ├── model.safetensors
+│   │       ├── tokenizer.json
+│   │       ├── tokenizer_config.json
+│   │       ├── special_tokens_map.json
+│   │       └── label_mapping.json
+│   ├── notebooks/
+│   │   └── kaggle_training.ipynb     ← Model training source code
+│   └── src/
+│       ├── __init__.py
+│       ├── preprocessing.py         ← Text preprocessing & keyword boosting
+│       ├── model.py                 ← BiLSTM model loader
+│       ├── bert_model.py            ← BERT model loader
+│       └── predict.py               ← Model inference pipeline
+├── video demo/                      ← Video demonstration folder
+├── .gitignore                       ← Git ignore rules
+├── LICENSE                          ← Project license
+└── README.md                        ← Root documentation file
 ```
 
 ---
 
 ## ⚙️ Setup Instructions
 
+> [!IMPORTANT]
+> All project commands must be run from inside the `project files` folder to ensure relative paths resolve correctly.
+
 ### Step 1 — Get Gemini API Key
-1. Go to https://aistudio.google.com/
-2. Sign in with Google
-3. Click "Get API Key" → "Create API Key"
-4. Copy the key into `.env`:
-   ```
-   GEMINI_API_KEY=your_key_here
+1. Go to [Google AI Studio](https://aistudio.google.com/).
+2. Sign in with your Google account.
+3. Click **"Get API Key"** and then **"Create API Key"**.
+4. Create a `.env` file inside the `project files` folder and paste your key:
+   ```env
+   GEMINI_API_KEY=your_actual_api_key_here
    ```
 
 ### Step 2 — Local Setup (Windows)
+Open your terminal at the repository root, then execute:
 ```bash
-# Create virtual environment
+# Navigate to the project directory
+cd "project files"
+
+# Create a virtual environment
 python -m venv .venv
+
+# Activate the virtual environment
 .venv\Scripts\activate
 
-# Install dependencies
+# Install all required packages
 pip install -r requirements.txt
 
-# Download NLTK data
+# Download necessary NLTK datasets
 python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt'); nltk.download('punkt_tab')"
 ```
 
-### Step 3 — Kaggle Training (GPU required — do NOT run locally)
-1. Go to https://www.kaggle.com/
-2. Create a new Notebook
-3. Enable GPU: Settings → Accelerator → GPU T4 x2
-4. Add datasets via "Add Data":
+### Step 3 — Kaggle Training (GPU Required)
+> [!NOTE]
+> Training models locally is not recommended due to hardware limitations (BERT requires a GPU).
+
+1. Go to [Kaggle](https://www.kaggle.com/).
+2. Create a new Notebook.
+3. Enable **GPU T4 x2** accelerator under Settings → Accelerator.
+4. Add the following datasets via the "Add Data" sidebar:
    - `google-research-datasets/go_emotions`
    - `atharvjairath/empatheticdialogues`
-   - `kaggle/isear-dataset` (or similar)
-5. Copy all cells from `notebooks/kaggle_training.ipynb` in order
-6. Run All
-7. Download output files from `/kaggle/working/`
-8. Place files into local folders:
-   - `bilstm_student_adaptive.keras` → `models/bltsm/`
-   - `tokenizer.pkl` → `models/bltsm/`
-   - `label_classes.npy` → `models/bltsm/`
-   - `bert_emotion_model_final/` (entire folder) → `models/`
-   - `emotion_text_dataset.csv` → `data/`
+   - `kaggle/isear-dataset`
+5. Copy the code blocks from `project files/notebooks/kaggle_training.ipynb` into your Kaggle cells.
+6. Run the notebook and download the generated output files from `/kaggle/working/`.
+7. Move the downloaded files to their respective local folders:
+   * `bilstm_student_adaptive.keras` → `project files/models/bltsm/`
+   * `tokenizer.pkl` → `project files/models/bltsm/`
+   * `label_classes.npy` → `project files/models/bltsm/`
+   * `bert_emotion_model_final/` (entire folder) → `project files/models/`
+   * `emotion_text_dataset.csv` → `project files/data/`
 
 ### Step 4 — Run the App
 ```bash
+# Ensure you are in the project files directory and venv is active
+cd "project files"
 streamlit run app.py
 ```
-Open http://localhost:8501 in your browser.
+Open **http://localhost:8501** in your browser.
 
 ---
 
-## 🎯 Features
+## 🎯 Core Features
 
-- **Dual-model emotion detection**: BiLSTM (fast, student-adaptive) + BERT (deep semantic)
-- **5 emotion classes**: Bored, Confident, Confused, Curious, Frustrated
-- **Mixed emotion detection**: Flags when multiple emotions score above 15%
-- **Gemini AI responses**: Personalized, field-specific learning guidance (falls back to templates)
-- **Analytics dashboard**: Emotion distribution, confidence timeline, field breakdown
-- **CSV logging**: Every interaction saved for continuous improvement
+- **🛡️ Dual-Model Emotion Detection:** Leverages a lightweight **BiLSTM** (for speed and user adaptation) in parallel with a deep **BERT** model (for semantic nuance).
+- **🎭 5 Target Emotion Classes:** Specifically trained on *Bored*, *Confident*, *Confused*, *Curious*, and *Frustrated*.
+- **📊 Mixed Emotion Flagging:** Detects and highlights mixed emotions if multiple targets score above the $15\%$ threshold.
+- **✨ Gemini AI support:** Generates highly tailored learning strategies and next steps using the updated **Gemini 2.5 Flash** model.
+- **📈 Live Analytics Dashboard:** Track emotion distribution, average confidence over time, and breakdown by academic field.
+- **💾 SQLite & CSV Logging:** Saves transaction details to SQLite database (`app.db`) and CSV records for future analysis and training.
 
 ---
 
-## 🔑 Key Technical Notes
+## 🔑 Technical Specifications
 
-| Parameter | Value |
-|---|---|
-| BiLSTM max sequence length | 80 tokens |
-| BERT max length | 128 tokens |
-| Keyword boost multiplier | 10× |
-| Mixed emotion threshold | 15% |
-| BERT class weights | [Bored:1.2, Confident:1.8, Confused:0.6, Curious:1.0, Frustrated:1.4] |
+| Parameter | Value | Description |
+| :--- | :--- | :--- |
+| **BiLSTM Sequence Length** | `80` tokens | Capped length for text sequences processed by BiLSTM |
+| **BERT Sequence Length** | `128` tokens | Maximum context size for BERT inference |
+| **Keyword Boost Multiplier** | `10×` | Weight multiplier for custom emotional keywords |
+| **Mixed Emotion Threshold** | `15%` | Minimum score to consider secondary emotions |
+| **BERT Class Weights** | `Bored: 1.2`<br>`Confident: 1.8`<br>`Confused: 0.6`<br>`Curious: 1.0`<br>`Frustrated: 1.4` | Class weights to counteract dataset imbalance during training |
 
 ---
 
 ## ⚠️ Edge Cases Handled
 
-- Models not found → friendly Streamlit error with instructions
-- Gemini API key missing/invalid → silent fallback to template responses
-- Input < 3 characters → user warning, no inference
-- CSV files auto-created on first interaction
+- **Missing Models:** Provides a friendly Streamlit landing warning if model files are missing, giving exact copy-paste paths.
+- **API Key Fallback:** If the Gemini API key is missing or invalid, the app silently falls back to hand-crafted templates corresponding to each emotion class.
+- **Short Input Protection:** Restricts inference on inputs under 3 characters to prevent invalid predictions on empty or short inputs.
+- **Auto-created storage:** Database files and logging CSVs are safely auto-created at runtime on the first interaction.
