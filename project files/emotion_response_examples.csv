@@ -209,3 +209,37 @@ I'm curious about machine learning,curious,0.7673792830017476,"That's wonderful 
 For a Computer Science student, a great strategy is to focus on understanding the core algorithms and mathematical concepts that power machine learning models. This foundational knowledge will help you build robust systems and debug effectively.
 
 A great next step is to pick one simple algorithm, like linear regression or K-Nearest Neighbors, and try to implement it from scratch using Python. Seeing it work firsthand is incredibly rewarding!",Computer Science,2026-07-08T19:44:01.288874
+I don't understand how recursion works. Every time I trace through the code I get lost.,confused,0.7461206912994385,"AI response unavailable: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.",Computer Science,2026-07-13T21:21:15.723852
+I don't understand how recursion works. Every time I trace through the code I get lost.,frustrated,0.4035847793817898,"AI response unavailable: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.",Computer Science,2026-07-13T21:21:15.723852
+I don't understand how recursion works. Every time I trace through the code I get lost.,confused,0.7461206912994385,"It's completely normal to feel confused and lost when you first start tracing recursion; many Computer Science students find it a tricky concept at first.
+
+Instead of trying to trace every single call at once, try to focus on just one level: assume the recursive call will correctly solve the smaller problem, and then figure out what your current function needs to do with that result.
+
+A good next step is to pick a very simple recursive function, like factorial, and carefully write down just two or three steps of its execution to see how it builds up.",Computer Science,2026-07-13T21:24:44.800480
+I don't understand how recursion works. Every time I trace through the code I get lost.,frustrated,0.4035847793817898,"It's completely normal to feel confused and lost when you first start tracing recursion; many Computer Science students find it a tricky concept at first.
+
+Instead of trying to trace every single call at once, try to focus on just one level: assume the recursive call will correctly solve the smaller problem, and then figure out what your current function needs to do with that result.
+
+A good next step is to pick a very simple recursive function, like factorial, and carefully write down just two or three steps of its execution to see how it builds up.",Computer Science,2026-07-13T21:24:44.800480
+"I don't understand how recursion works. Every time I trace through the code I get lost.
+",confused,0.7461206912994385,"It's completely normal to feel confused about recursion; many students find it one of the trickiest topics initially, so you're definitely not alone.
+
+Instead of tracing every single step, try to understand the 'recursive leap of faith': assume that the recursive call you make *already works* for a smaller version of the problem.
+
+As a next step, pick a very simple problem like calculating factorials or Fibonacci numbers recursively and try to apply this 'leap of faith' idea.",Computer Science,2026-07-14T09:57:54.397543
+"I don't understand how recursion works. Every time I trace through the code I get lost.
+",frustrated,0.4035847793817898,"It's completely normal to feel confused about recursion; many students find it one of the trickiest topics initially, so you're definitely not alone.
+
+Instead of tracing every single step, try to understand the 'recursive leap of faith': assume that the recursive call you make *already works* for a smaller version of the problem.
+
+As a next step, pick a very simple problem like calculating factorials or Fibonacci numbers recursively and try to apply this 'leap of faith' idea.",Computer Science,2026-07-14T09:57:54.397543
+I don't understand how recursion works. Every time I trace through the code I get lost.,confused,0.7461206912994385,"It's totally understandable to feel confused about recursion; it's a concept that many computer science students find challenging at first. Getting lost while tracing is a very common experience.
+
+A powerful strategy is to focus on understanding the ""base case"" (when the function stops) and the ""recursive step"" (how it calls itself with a simpler input). Instead of tracing everything, try to trust that the smaller recursive call will work correctly, and then think about how that result helps solve the current problem.
+
+Pick a very simple recursive problem you've seen, like calculating a factorial or summing numbers in a list, and try to explain it out loud to yourself. Talking through the base case and the recursive step can really help clarify things.",Computer Science,2026-07-14T10:01:17.782846
+I don't understand how recursion works. Every time I trace through the code I get lost.,frustrated,0.4035847793817898,"It's totally understandable to feel confused about recursion; it's a concept that many computer science students find challenging at first. Getting lost while tracing is a very common experience.
+
+A powerful strategy is to focus on understanding the ""base case"" (when the function stops) and the ""recursive step"" (how it calls itself with a simpler input). Instead of tracing everything, try to trust that the smaller recursive call will work correctly, and then think about how that result helps solve the current problem.
+
+Pick a very simple recursive problem you've seen, like calculating a factorial or summing numbers in a list, and try to explain it out loud to yourself. Talking through the base case and the recursive step can really help clarify things.",Computer Science,2026-07-14T10:01:17.782846

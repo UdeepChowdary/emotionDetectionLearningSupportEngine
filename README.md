@@ -15,6 +15,13 @@
 
 ---
 
+## 🎥 Video Demonstration
+
+Watch the full live demonstration of the Emotion Detection & Learning Support Engine in action here:  
+**[👉 View Project Demo Video](https://drive.google.com/drive/folders/1PzUoGEjt2xHoXqUhRdBYTDsmVob2_m9C?usp=sharing)**
+
+---
+
 ## 📁 Project Structure
 
 ```
@@ -24,6 +31,7 @@ emotion-detection/
 │   ├── .env                         ← Local environment variables (API keys)
 │   ├── .venv/                       ← Virtual environment folder
 │   ├── app.py                       ← Streamlit Web Application entrypoint
+│   ├── performance_test.py          ← Performance & load testing script
 │   ├── requirements.txt             ← Project dependencies
 │   ├── emotion_response_examples.csv ← Saved history (auto-created at runtime)
 │   ├── emotion_response_mapping.csv  ← Emotion responses (auto-created at runtime)
@@ -50,6 +58,7 @@ emotion-detection/
 │       ├── bert_model.py            ← BERT model loader
 │       └── predict.py               ← Model inference pipeline
 ├── video demo/                      ← Video demonstration folder
+│   └── README.md                    ← Demo video link and summary
 ├── .gitignore                       ← Git ignore rules
 ├── LICENSE                          ← Project license
 └── README.md                        ← Root documentation file
@@ -117,6 +126,15 @@ cd "project files"
 streamlit run app.py
 ```
 Open **http://localhost:8501** in your browser.
+
+### Step 5 — Performance Testing (Optional)
+To test the server's load capacity and response times:
+1. Ensure the Streamlit app (`app.py`) is running.
+2. Open a new terminal, activate the `.venv`, and run:
+   ```bash
+   cd "project files"
+   python performance_test.py
+   ```
 
 ---
 
