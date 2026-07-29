@@ -54,7 +54,11 @@ engine = create_engine(f'sqlite:///{DB_PATH}', echo=False)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_db():
-    Base.metadata.create_all(bind=engine)
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        if "already exists" not in str(e).lower():
+            raise
 
 def get_db():
     db = SessionLocal()
