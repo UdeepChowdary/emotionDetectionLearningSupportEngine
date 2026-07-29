@@ -1,4 +1,9 @@
 import os
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
 import json
 import datetime
 import streamlit as st
@@ -68,6 +73,12 @@ CSV_MAPPING_FILE = 'emotion_response_mapping.csv'
 def load_models():
     """Load both models once and cache them across all Streamlit sessions."""
     try:
+        import torch
+        torch.set_num_threads(1)
+        import tensorflow as tf
+        tf.config.threading.set_inter_op_parallelism_threads(1)
+        tf.config.threading.set_intra_op_parallelism_threads(1)
+
         from src.model import load_bilstm_model
         from src.bert_model import load_bert_model
         bilstm_assets = load_bilstm_model()
