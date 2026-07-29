@@ -17,9 +17,6 @@
 
 ## 🎥 Video Demonstration
 
-![Project Demo](video%20demo/videoPreview.gif)
-
-Watch the full live demonstration of the Emotion Detection & Learning Support Engine in action here:  
 **[👉 View Project Demo Video](https://drive.google.com/drive/folders/1PzUoGEjt2xHoXqUhRdBYTDsmVob2_m9C?usp=sharing)**
 
 ---
