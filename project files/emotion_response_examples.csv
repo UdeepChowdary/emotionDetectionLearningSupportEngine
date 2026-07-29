@@ -243,3 +243,30 @@ I don't understand how recursion works. Every time I trace through the code I ge
 A powerful strategy is to focus on understanding the ""base case"" (when the function stops) and the ""recursive step"" (how it calls itself with a simpler input). Instead of tracing everything, try to trust that the smaller recursive call will work correctly, and then think about how that result helps solve the current problem.
 
 Pick a very simple recursive problem you've seen, like calculating a factorial or summing numbers in a list, and try to explain it out loud to yourself. Talking through the base case and the recursive step can really help clarify things.",Computer Science,2026-07-14T10:01:17.782846
+I'm confused about recursion,confused,0.9995133876800536,"AI response unavailable: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}",Computer Science,2026-07-29T10:46:12.168397
+I'm confused about recursion,confused,0.9198190310139588,"AI response unavailable: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}",Computer Science,2026-07-29T10:46:12.168397
+I'm confused about recursion,confused,0.9995133876800536,"It's completely normal to feel confused about recursion at first; it's a concept that many computer science students find tricky, so you're not alone.
+
+A specific tip for computer science is to always identify the ""base case"" first. This is the simplest version of the problem that doesn't need to call itself again.
+
+As an encouraging next step, try tracing a very simple recursive function, like calculating a factorial, by drawing out each function call on a piece of paper.",Computer Science,2026-07-29T10:49:05.425413
+I'm confused about recursion,confused,0.9198190310139588,"It's completely normal to feel confused about recursion at first; it's a concept that many computer science students find tricky, so you're not alone.
+
+A specific tip for computer science is to always identify the ""base case"" first. This is the simplest version of the problem that doesn't need to call itself again.
+
+As an encouraging next step, try tracing a very simple recursive function, like calculating a factorial, by drawing out each function call on a piece of paper.",Computer Science,2026-07-29T10:49:05.425413
+I'm curious about machine learning,curious,0.9995978474617004,"It's wonderful that you're feeling curious about machine learning! That's a fantastic starting point for exploration.
+
+As a Computer Science student, a great strategy is to focus on understanding the underlying algorithms and data structures that power machine learning models. This will give you a deeper appreciation for how they work.
+
+A good next step could be to try out a beginner-friendly tutorial for a simple machine learning project, like predicting house prices or classifying images, using a popular library like scikit-learn in Python.",Computer Science,2026-07-29T10:53:21.771584
+I'm curious about machine learning,curious,0.7673792005429747,"It's wonderful that you're feeling curious about machine learning! That's a fantastic starting point for exploration.
+
+As a Computer Science student, a great strategy is to focus on understanding the underlying algorithms and data structures that power machine learning models. This will give you a deeper appreciation for how they work.
+
+A good next step could be to try out a beginner-friendly tutorial for a simple machine learning project, like predicting house prices or classifying images, using a popular library like scikit-learn in Python.",Computer Science,2026-07-29T10:53:21.771584
+I'm curious about machine learning,curious,0.7673792005429747,"It's wonderful that you're feeling curious about machine learning! That's a fantastic starting point for exploration.
+
+As a Computer Science student, a great strategy is to focus on understanding the underlying algorithms and data structures that power machine learning models. This will give you a deeper appreciation for how they work.
+
+A good next step could be to try out a beginner-friendly tutorial for a simple machine learning project, like predicting house prices or classifying images, using a popular library like scikit-learn in Python.",Computer Science,2026-07-29T10:54:13.851520

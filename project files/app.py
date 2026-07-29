@@ -331,7 +331,7 @@ def add_to_history(field, problem, emotion, confidence, ai_response, bilstm_scor
 
 def render_results(prediction: dict, field: str, problem_text: str,
                    use_ai: bool, save_data: bool, show_details: bool,
-                   gemini_model):
+                   gemini_model, override_ai_response: str = None):
     """
     Display BiLSTM vs BERT comparison, mixed emotions, AI response.
     Log to session history and CSV.
@@ -387,7 +387,9 @@ def render_results(prediction: dict, field: str, problem_text: str,
     primary_emotion = bilstm_result['emotion']
     primary_confidence = bilstm_result['confidence']
 
-    if use_ai:
+    if override_ai_response:
+        ai_response = override_ai_response
+    elif use_ai:
         with st.spinner("Generating personalized guidance..."):
             ai_response = get_gemini_response(
                 gemini_model, field, problem_text, primary_emotion, primary_confidence
@@ -437,59 +439,76 @@ def render_analytics():
     st.header("📈 Learning Analytics")
 
     df = pd.DataFrame(st.session_state.emotion_history)
-    tab1, tab2, tab3 = st.tabs(["Emotions", "Fields", "Summary"])
+    
+    # Filter for primary model to avoid double counting
+    if 'model' in df.columns:
+        df_primary = df[df['model'] == 'BiLSTM']
+    else:
+        df_primary = df
+
+    tab1, tab2, tab3 = st.tabs(["My Journey", "Subject Analysis", "Summary"])
 
     with tab1:
         col1, col2 = st.columns(2)
         with col1:
             # Emotion distribution pie chart
-            emotion_counts = df['emotion'].value_counts()
+            emotion_counts = df_primary['emotion'].value_counts()
             fig1 = px.pie(
                 values=emotion_counts.values, names=emotion_counts.index,
-                title="Emotion Distribution"
+                title="Overall Mood Distribution",
+                hole=0.4
             )
             st.plotly_chart(fig1, use_container_width=True)
 
         with col2:
-            # Confidence timeline line chart
-            df_copy = df.copy()
-            df_copy['time'] = df_copy['timestamp'].dt.strftime('%H:%M:%S')
-            fig2 = px.line(
-                df_copy, x='time', y='confidence', color='emotion',
-                title="Emotional Journey", markers=True
+            # Emotion Timeline Scatter Plot
+            df_copy = df_primary.copy()
+            df_copy['time'] = pd.to_datetime(df_copy['timestamp']).dt.strftime('%H:%M:%S')
+            fig2 = px.scatter(
+                df_copy, x='time', y='emotion', color='emotion',
+                title="Emotional Journey Timeline",
+                size_max=10
             )
+            fig2.update_traces(marker=dict(size=12))
+            fig2.update_yaxes(categoryorder="total ascending")
             st.plotly_chart(fig2, use_container_width=True)
 
     with tab2:
-        # Emotion by field bar chart
-        if 'model' in df.columns:
-            field_emotion = df.groupby(['field', 'emotion', 'model']).size().reset_index(name='count')
-            fig3 = px.bar(
-                field_emotion, x='field', y='count', color='emotion', facet_col='model',
-                title="Emotions by Study Field & Model"
-            )
-        else:
-            field_emotion = df.groupby(['field', 'emotion']).size().reset_index(name='count')
-            fig3 = px.bar(
-                field_emotion, x='field', y='count', color='emotion',
-                title="Emotions by Study Field"
-            )
+        # Emotions by Study Field (Stacked Bar)
+        field_emotion = df_primary.groupby(['field', 'emotion']).size().reset_index(name='count')
+        fig3 = px.bar(
+            field_emotion, x='field', y='count', color='emotion',
+            title="Emotions by Subject",
+            barmode="stack"
+        )
         st.plotly_chart(fig3, use_container_width=True)
 
     with tab3:
         # Summary stats
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("Total Interactions", len(df))
+            st.metric("Total Interactions", len(df_primary))
         with col2:
-            avg_conf = df['confidence'].mean()
-            st.metric("Avg Confidence", f"{avg_conf:.1%}")
+            avg_conf = df_primary['confidence'].mean()
+            st.metric("Avg Prediction Confidence", f"{avg_conf:.1%}")
         with col3:
-            top_emotion = df['emotion'].mode()[0] if len(df) > 0 else "—"
+            top_emotion = df_primary['emotion'].mode()[0] if len(df_primary) > 0 else "—"
             st.metric("Most Frequent Emotion", top_emotion)
+            
+        # Actionable insight
+        if len(df_primary) > 0:
+            st.markdown("### Actionable Insight")
+            if top_emotion == "Frustrated":
+                st.info("💡 **Insight**: You've been feeling mostly Frustrated. Consider taking a 5-minute break, reviewing fundamental concepts, or trying the Pomodoro technique to avoid burnout!")
+            elif top_emotion == "Confused":
+                st.info("💡 **Insight**: You seem Confused frequently. Try breaking down problems into smaller steps or exploring a different explanation (like a YouTube video) for these topics.")
+            elif top_emotion == "Bored":
+                st.info("💡 **Insight**: You're feeling Bored. Try to challenge yourself with harder problems or find a way to apply what you're learning to a real-world project that interests you.")
+            else:
+                st.success(f"💡 **Insight**: Your dominant emotion is {top_emotion}. Keep up the great work and maintain your current study strategies!")
 
         st.dataframe(
-            df[['timestamp', 'field', 'emotion', 'confidence', 'model']].tail(10),
+            df_primary[['timestamp', 'field', 'emotion', 'confidence', 'model']].tail(10),
             use_container_width=True
         )
 
@@ -591,12 +610,38 @@ def main():
             st.warning("Please describe your study challenge in at least a few words.")
         else:
             from src.predict import run_prediction
-            with st.spinner("Analyzing your emotions..."):
-                prediction = run_prediction(problem_text, bilstm_assets, bert_assets)
+            
+            prediction = None
+            csv_ai_response = None
+            
+            if use_csv_prediction and len(examples_df) > 0:
+                match = examples_df[examples_df['text'].str.lower() == problem_text.lower().strip()]
+                if not match.empty:
+                    match_row = match.iloc[-1]
+                    csv_emotion = str(match_row['emotion']).capitalize()
+                    csv_conf = float(match_row['confidence'])
+                    prediction = {
+                        'bilstm_result': {
+                            'emotion': csv_emotion,
+                            'confidence': csv_conf,
+                            'scores': {csv_emotion: csv_conf},
+                            'cleaned_text': problem_text
+                        },
+                        'bert_result': None,
+                        'bilstm_mixed': [(csv_emotion, csv_conf)],
+                        'bert_mixed': []
+                    }
+                    csv_ai_response = str(match_row['response'])
+                    st.success("🎯 Exact match found in saved CSV dataset!")
+                    
+            if prediction is None:
+                with st.spinner("Analyzing your emotions..."):
+                    prediction = run_prediction(problem_text, bilstm_assets, bert_assets)
+                    
             render_results(
                 prediction, field, problem_text,
                 use_ai, save_data, show_details,
-                gemini_model
+                gemini_model, override_ai_response=csv_ai_response
             )
 
     # Analytics
