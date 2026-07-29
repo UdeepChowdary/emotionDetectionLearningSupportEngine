@@ -26,6 +26,41 @@ st.set_page_config(
     layout="wide"
 )
 
+def apply_custom_css():
+    st.markdown("""
+        <style>
+        /* Modern Button Styling */
+        div.stButton > button:first-child {
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        div.stButton > button:first-child:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 99, 255, 0.2);
+        }
+        
+        /* Metric Glassmorphism */
+        div[data-testid="metric-container"] {
+            background-color: rgba(38, 39, 48, 0.5);
+            border: 1px solid rgba(250, 250, 250, 0.1);
+            padding: 1rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Sidebar styling */
+        section[data-testid="stSidebar"] {
+            border-right: 1px solid rgba(250, 250, 250, 0.1);
+        }
+        
+        /* Header spacing */
+        h1, h2, h3 {
+            padding-bottom: 0.5rem;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+
 # ---------------------------------------------------------------------------
 # Constants (Section 5.2)
 # ---------------------------------------------------------------------------
@@ -358,39 +393,41 @@ def render_results(prediction: dict, field: str, problem_text: str,
 
     # Model comparison with mixed sentiment detection
     st.subheader("🔬 Model Predictions Comparison")
-    if bert_result:
-        col1, col2 = st.columns(2)
-    else:
-        col1 = st.columns(1)[0]
-        
-    with col1:
-        st.write("**BiLSTM Student Adaptive**")
-        bilstm_mixed = get_mixed_emotions(bilstm_result['scores'])
-        
-        if len(bilstm_mixed) > 1:
-            mixed_text = " + ".join([f"{EMOTION_RESPONSES[em[0]]['emoji']} {em[0]}" for em in bilstm_mixed])
-            st.metric("Mixed Emotions", mixed_text, f"Primary: {bilstm_mixed[0][1]:.1%}")
+    
+    with st.container(border=True):
+        if bert_result:
+            col1, col2 = st.columns(2)
         else:
-            bilstm_emoji = EMOTION_RESPONSES[bilstm_result['emotion']]['emoji']
-            st.metric("Emotion", f"{bilstm_emoji} {bilstm_result['emotion']}", f"{bilstm_result['confidence']:.1%}")
+            col1 = st.columns(1)[0]
             
-        for emotion_name, score in sorted(bilstm_result['scores'].items(), key=lambda x: x[1], reverse=True):
-            st.progress(score, text=f"{emotion_name}: {score:.1%}")
-
-    if bert_result:
-        with col2:
-            st.write("**BERT Transformer**")
-            bert_mixed = get_mixed_emotions(bert_result['scores'])
+        with col1:
+            st.write("**BiLSTM Student Adaptive**")
+            bilstm_mixed = get_mixed_emotions(bilstm_result['scores'])
             
-            if len(bert_mixed) > 1:
-                mixed_text = " + ".join([f"{EMOTION_RESPONSES[em[0]]['emoji']} {em[0]}" for em in bert_mixed])
-                st.metric("Mixed Emotions", mixed_text, f"Primary: {bert_mixed[0][1]:.1%}")
+            if len(bilstm_mixed) > 1:
+                mixed_text = " + ".join([f"{EMOTION_RESPONSES[em[0]]['emoji']} {em[0]}" for em in bilstm_mixed])
+                st.metric("Mixed Emotions", mixed_text, f"Primary: {bilstm_mixed[0][1]:.1%}")
             else:
-                bert_emoji = EMOTION_RESPONSES[bert_result['emotion']]['emoji']
-                st.metric("Emotion", f"{bert_emoji} {bert_result['emotion']}", f"{bert_result['confidence']:.1%}")
+                bilstm_emoji = EMOTION_RESPONSES[bilstm_result['emotion']]['emoji']
+                st.metric("Emotion", f"{bilstm_emoji} {bilstm_result['emotion']}", f"{bilstm_result['confidence']:.1%}")
                 
-            for emotion_name, score in sorted(bert_result['scores'].items(), key=lambda x: x[1], reverse=True):
+            for emotion_name, score in sorted(bilstm_result['scores'].items(), key=lambda x: x[1], reverse=True):
                 st.progress(score, text=f"{emotion_name}: {score:.1%}")
+    
+        if bert_result:
+            with col2:
+                st.write("**BERT Transformer**")
+                bert_mixed = get_mixed_emotions(bert_result['scores'])
+                
+                if len(bert_mixed) > 1:
+                    mixed_text = " + ".join([f"{EMOTION_RESPONSES[em[0]]['emoji']} {em[0]}" for em in bert_mixed])
+                    st.metric("Mixed Emotions", mixed_text, f"Primary: {bert_mixed[0][1]:.1%}")
+                else:
+                    bert_emoji = EMOTION_RESPONSES[bert_result['emotion']]['emoji']
+                    st.metric("Emotion", f"{bert_emoji} {bert_result['emotion']}", f"{bert_result['confidence']:.1%}")
+                    
+                for emotion_name, score in sorted(bert_result['scores'].items(), key=lambda x: x[1], reverse=True):
+                    st.progress(score, text=f"{emotion_name}: {score:.1%}")
 
     # AI Response
     st.markdown("---")
@@ -410,7 +447,11 @@ def render_results(prediction: dict, field: str, problem_text: str,
         ai_response = EMOTION_RESPONSES[primary_emotion]['response']
 
     emoji = EMOTION_RESPONSES[primary_emotion]['emoji']
-    st.info(f"💡 **AI Response based on BiLSTM prediction: {primary_emotion}**\n\n{ai_response}")
+    
+    with st.chat_message("assistant", avatar=emoji):
+        st.markdown(f"**AI Response based on BiLSTM prediction: {primary_emotion}**")
+        st.write(ai_response)
+        
     st.success(f"📖 **Additional Support**\n\n**Strategy:** {EMOTION_RESPONSES[primary_emotion]['action']}")
 
     if show_details:
@@ -546,6 +587,8 @@ def main():
 
     # Page title
     st.title("🤖 Emotion-Aware Learning Assistant")
+    
+    apply_custom_css()
 
     if auth_status is False:
         st.info("👋 Please login or sign up from the sidebar to continue.")
@@ -563,48 +606,50 @@ def main():
 
     col1, col2 = st.columns([2, 1])
     with col1:
-        st.subheader("📚 Tell us about your learning challenge")
-        # Field selection
-        field = st.selectbox(
-            "What field are you studying?",
-            ACADEMIC_FIELDS,
-            help="Select your area of study for personalized responses"
-        )
-        
-        # Problem description
-        problem_text = st.text_area(
-            f"Describe your {field} problem or challenge:",
-            placeholder=f"e.g., 'I'm struggling with algorithms in {field}' or 'This concept is confusing'",
-            height=120,
-            key="problem_input"
-        )
-        
-        st.write("**Quick Examples:**")
-        ex1, ex2, ex3 = st.columns(3)
-        
-        def set_example(text):
-            st.session_state.problem_input = text
+        with st.container(border=True):
+            st.subheader("📚 Tell us about your learning challenge")
+            # Field selection
+            field = st.selectbox(
+                "What field are you studying?",
+                ACADEMIC_FIELDS,
+                help="Select your area of study for personalized responses"
+            )
             
-        with ex1:
-            st.button("I'm confused about recursion", on_click=set_example, args=("I'm confused about recursion",), use_container_width=True)
-        with ex2:
-            st.button("Debugging is frustrating", on_click=set_example, args=("Debugging is frustrating",), use_container_width=True)
-        with ex3:
-            st.button("I'm curious about machine learning", on_click=set_example, args=("I'm curious about machine learning",), use_container_width=True)
+            # Problem description
+            problem_text = st.text_area(
+                f"Describe your {field} problem or challenge:",
+                placeholder=f"e.g., 'I'm struggling with algorithms in {field}' or 'This concept is confusing'",
+                height=120,
+                key="problem_input"
+            )
+            
+            st.write("**Quick Examples:**")
+            ex1, ex2, ex3 = st.columns(3)
+            
+            def set_example(text):
+                st.session_state.problem_input = text
+                
+            with ex1:
+                st.button("I'm confused about recursion", on_click=set_example, args=("I'm confused about recursion",), use_container_width=True)
+            with ex2:
+                st.button("Debugging is frustrating", on_click=set_example, args=("Debugging is frustrating",), use_container_width=True)
+            with ex3:
+                st.button("I'm curious about machine learning", on_click=set_example, args=("I'm curious about machine learning",), use_container_width=True)
 
     with col2:
-        st.subheader("⚙️ Settings")
-        use_ai = st.checkbox("Use AI Response (Gemini)", value=True)
-        save_data = st.checkbox("Save to CSV for learning", value=True)
-        show_details = st.checkbox("Show analysis details", value=False)
-        
-        # CSV Prediction Option
-        st.markdown("---")
-        st.write("**📊 Predict from Saved Data**")
-        use_csv_prediction = st.checkbox("Use CSV-based prediction", value=False)
-        
-        if use_csv_prediction and len(examples_df) > 0:
-            st.info(f"Using {len(examples_df)} saved examples for prediction")
+        with st.container(border=True):
+            st.subheader("⚙️ Settings")
+            use_ai = st.checkbox("Use AI Response (Gemini)", value=True)
+            save_data = st.checkbox("Save to CSV for learning", value=True)
+            show_details = st.checkbox("Show analysis details", value=False)
+            
+            # CSV Prediction Option
+            st.markdown("---")
+            st.write("**📊 Predict from Saved Data**")
+            use_csv_prediction = st.checkbox("Use CSV-based prediction", value=False)
+            
+            if use_csv_prediction and len(examples_df) > 0:
+                st.info(f"Using {len(examples_df)} saved examples for prediction")
 
     # Run button
     col1, col2 = st.columns([1, 5])
