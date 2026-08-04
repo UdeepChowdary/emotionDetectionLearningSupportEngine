@@ -14,6 +14,7 @@ import plotly.graph_objects as go
 from dotenv import load_dotenv
 from google import genai
 from src.database import init_db, get_db, User, Emotion_Record
+from src.styles import apply_theme, EMOTION_COLORS, EMOTION_EMOJI
 from sqlalchemy.orm import Session
 
 load_dotenv()
@@ -21,44 +22,21 @@ load_dotenv()
 from src.preprocessing import get_mixed_emotions
 
 st.set_page_config(
-    page_title="AI Learning Assistant",
-    page_icon="🎓",
-    layout="wide"
+    page_title="MindLearn AI — Emotion-Aware Learning",
+    page_icon="🧠",
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+        'Get Help': 'https://github.com',
+        'Report a bug': 'https://github.com',
+        'About': '# MindLearn AI\nEmotion-Aware Learning Support Engine'
+    }
 )
 
-def apply_custom_css():
-    st.markdown("""
-        <style>
-        /* Modern Button Styling */
-        div.stButton > button:first-child {
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        div.stButton > button:first-child:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(108, 99, 255, 0.2);
-        }
-        
-        /* Metric Glassmorphism */
-        div[data-testid="metric-container"] {
-            background-color: rgba(38, 39, 48, 0.5);
-            border: 1px solid rgba(250, 250, 250, 0.1);
-            padding: 1rem;
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-        }
-        
-        /* Sidebar styling */
-        section[data-testid="stSidebar"] {
-            border-right: 1px solid rgba(250, 250, 250, 0.1);
-        }
-        
-        /* Header spacing */
-        h1, h2, h3 {
-            padding-bottom: 0.5rem;
-        }
-        </style>
-    """, unsafe_allow_html=True)
+# Apply premium design system globally
+apply_theme()
+
+# apply_custom_css removed — replaced by src/styles.py apply_theme() called at startup
 
 
 # ---------------------------------------------------------------------------
@@ -246,20 +224,38 @@ def init_session_state():
 # Sidebar (Section 5.7)
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Sidebar (Section 5.7)
+# ---------------------------------------------------------------------------
+
 def render_sidebar(gemini_model):
     with st.sidebar:
-        st.title("🧠 AI Learning Assistant")
-        st.markdown("---")
+        # Premium branding header
+        st.markdown("""
+            <div style="padding: 1rem 0.5rem 0.5rem 0.5rem; text-align: center;">
+                <div style="font-size: 2.2rem; margin-bottom: 0.3rem;">🧠</div>
+                <h2 style="background: linear-gradient(135deg, #7C3AED, #06B6D4);
+                           -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                           background-clip: text; font-size: 1.25rem; font-weight: 800;
+                           margin: 0; letter-spacing: -0.02em;">MindLearn AI</h2>
+                <p style="color: #64748B; font-size: 0.7rem; margin: 0.2rem 0 0 0;
+                          text-transform: uppercase; letter-spacing: 0.08em;">
+                    Emotion-Aware Learning
+                </p>
+            </div>
+            <div style="height: 1px; background: linear-gradient(90deg, transparent, #7C3AED, #06B6D4, transparent);
+                        opacity: 0.4; margin: 0.75rem 0;"></div>
+        """, unsafe_allow_html=True)
 
         if st.session_state.user_id is None:
-            st.subheader("Login / Sign Up")
-            auth_mode = st.radio("Select mode", ["Login", "Sign Up"], horizontal=True)
-            email = st.text_input("Email")
-            password = st.text_input("Password", type="password")
-            
+            st.markdown("<p style='color: #94A3B8; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;'>ACCOUNT</p>", unsafe_allow_html=True)
+            auth_mode = st.radio("", ["Login", "Sign Up"], horizontal=True, label_visibility="collapsed")
+            email = st.text_input("Email", placeholder="you@example.com")
+            password = st.text_input("Password", type="password", placeholder="••••••••")
+
             if auth_mode == "Sign Up":
-                name = st.text_input("Name")
-                if st.button("Sign Up"):
+                name = st.text_input("Full Name", placeholder="Your name")
+                if st.button("🚀 Create Account", type="primary", use_container_width=True):
                     db = next(get_db())
                     existing = db.query(User).filter(User.Email == email).first()
                     if existing:
@@ -271,10 +267,10 @@ def render_sidebar(gemini_model):
                         new_user.set_password(password)
                         db.add(new_user)
                         db.commit()
-                        st.success("Account created! You can now log in.")
+                        st.success("✅ Account created! You can now log in.")
                     db.close()
             else:
-                if st.button("Login"):
+                if st.button("🔐 Login", type="primary", use_container_width=True):
                     db = next(get_db())
                     user = db.query(User).filter(User.Email == email).first()
                     if user and user.check_password(password):
@@ -288,21 +284,41 @@ def render_sidebar(gemini_model):
                         st.error("Invalid email or password.")
                     db.close()
             return False
-        
+
         else:
-            st.subheader(f"Welcome, {st.session_state.user_name} 👋")
-            if st.button("Logout"):
+            # Logged in user panel
+            st.markdown(f"""
+                <div style="background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.2);
+                            border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 0.75rem;">
+                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                        <div style="width: 36px; height: 36px; border-radius: 50%;
+                                    background: linear-gradient(135deg, #7C3AED, #06B6D4);
+                                    display: flex; align-items: center; justify-content: center;
+                                    font-size: 1rem; font-weight: 700; color: white; flex-shrink: 0;">
+                            {st.session_state.user_name[0].upper()}
+                        </div>
+                        <div>
+                            <div style="font-size: 0.9rem; font-weight: 700; color: #E2E8F0;">
+                                {st.session_state.user_name}
+                            </div>
+                            <div style="font-size: 0.7rem; color: #64748B;">
+                                {st.session_state.user_email}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
+            if st.button("↩ Logout", use_container_width=True):
                 st.session_state.user_id = None
                 st.session_state.user_name = None
                 st.session_state.user_email = None
                 st.rerun()
 
-        st.markdown("---")
+        st.markdown("<div style='height: 1px; background: rgba(255,255,255,0.07); margin: 0.75rem 0;'></div>", unsafe_allow_html=True)
 
-        # Model status
-        st.header("📊 Dashboard")
-        status = "Active" if gemini_model else "Template Fallback"
-        st.write(f"Models: {status}")
+        # Premium stats panel
+        ai_status_color = "#10B981" if gemini_model else "#F59E0B"
+        ai_status_text = "🟢 Gemini Active" if gemini_model else "🟡 Template Mode"
 
         csv_count = 0
         if os.path.exists(CSV_EXAMPLES_FILE):
@@ -311,19 +327,68 @@ def render_sidebar(gemini_model):
             except Exception:
                 csv_count = 0
 
-        st.write(f"Total Interactions: {len(st.session_state.emotion_history)}")
-        st.write(f"CSV Examples: {csv_count}")
+        total_sessions = len([x for x in st.session_state.emotion_history if x.get('model') == 'BiLSTM'])
+        st.markdown(f"""
+            <p style="color: #94A3B8; font-size: 0.8rem; font-weight: 600;
+                       text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.6rem;">
+                SESSION STATS
+            </p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.75rem;">
+                <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+                            border-radius: 10px; padding: 0.65rem; text-align: center;">
+                    <div style="font-size: 1.4rem; font-weight: 800;
+                                background: linear-gradient(135deg, #7C3AED, #06B6D4);
+                                -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                                background-clip: text;">{total_sessions}</div>
+                    <div style="font-size: 0.65rem; color: #64748B; text-transform: uppercase;
+                                letter-spacing: 0.04em; font-weight: 600;">Sessions</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+                            border-radius: 10px; padding: 0.65rem; text-align: center;">
+                    <div style="font-size: 1.4rem; font-weight: 800;
+                                background: linear-gradient(135deg, #7C3AED, #06B6D4);
+                                -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                                background-clip: text;">{csv_count}</div>
+                    <div style="font-size: 0.65rem; color: #64748B; text-transform: uppercase;
+                                letter-spacing: 0.04em; font-weight: 600;">Saved</div>
+                </div>
+            </div>
+            <div style="font-size: 0.75rem; color: #64748B; margin-bottom: 0.75rem; 
+                        padding: 0.4rem 0.6rem; background: rgba(255,255,255,0.03);
+                        border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+                {ai_status_text}
+            </div>
+        """, unsafe_allow_html=True)
 
-        if st.button("Clear History"):
+        if st.button("🗑 Clear History", use_container_width=True):
             st.session_state.emotion_history = []
             st.rerun()
 
-        # Recent interactions
+        # Recent interactions — styled timeline
         if st.session_state.emotion_history:
-            st.subheader("Recent Sessions")
-            recent = st.session_state.emotion_history[-3:]
+            st.markdown("""
+                <p style="color: #94A3B8; font-size: 0.8rem; font-weight: 600;
+                           text-transform: uppercase; letter-spacing: 0.06em;
+                           margin: 0.75rem 0 0.5rem 0;">RECENT</p>
+            """, unsafe_allow_html=True)
+            recent = [x for x in st.session_state.emotion_history if x.get('model') == 'BiLSTM'][-3:]
             for item in reversed(recent):
-                st.write(f"• {item['field']}: {item['emotion']} ({item['confidence']:.1%})")
+                emotion = item['emotion'].split(' + ')[0]  # primary only
+                emoji_map = {"Confused": "😕", "Frustrated": "😤", "Confident": "🎉", "Bored": "😑", "Curious": "🤩"}
+                clr_map = {"Confused": "#60A5FA", "Frustrated": "#F87171", "Confident": "#34D399", "Bored": "#A78BFA", "Curious": "#FBBF24"}
+                emoji = emoji_map.get(emotion, "🔍")
+                clr   = clr_map.get(emotion, "#94A3B8")
+                st.markdown(f"""
+                    <div style="display: flex; align-items: center; gap: 0.5rem;
+                                padding: 0.4rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <span style="font-size: 1rem;">{emoji}</span>
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="font-size: 0.78rem; font-weight: 600; color: {clr};
+                                        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{item['emotion']}</div>
+                            <div style="font-size: 0.68rem; color: #64748B;">{item['field']} · {item['confidence']:.0%}</div>
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
 
 
 
@@ -585,16 +650,32 @@ def main():
     # Render sidebar
     auth_status = render_sidebar(gemini_model)
 
-    # Page title
-    st.title("🤖 Emotion-Aware Learning Assistant")
-    
-    apply_custom_css()
+    # Page title with premium styled header
+    st.markdown("""
+        <div style="margin-bottom: 0.5rem;">
+            <h1 style="background: linear-gradient(135deg, #7C3AED, #06B6D4);
+                       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                       background-clip: text; font-size: 2rem; font-weight: 800; margin: 0;">
+                🤖 MindLearn AI
+            </h1>
+            <p style="color: #94A3B8; font-size: 0.95rem; margin: 0.25rem 0 1rem 0;">
+                Emotion-Aware Learning Support Engine
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
 
     if auth_status is False:
-        st.info("👋 Please login or sign up from the sidebar to continue.")
+        st.markdown("""
+            <div style="background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.25);
+                        border-radius: 12px; padding: 1.5rem; text-align: center; margin-top: 2rem;">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">👋</div>
+                <h3 style="color: #E2E8F0; margin: 0 0 0.5rem 0;">Welcome to MindLearn AI</h3>
+                <p style="color: #94A3B8; margin: 0;">Please login or sign up from the sidebar to start your emotion-aware learning journey.</p>
+            </div>
+        """, unsafe_allow_html=True)
         return
 
-    st.markdown("Get personalized help based on your field and emotional state")
+    st.markdown("<p style='color: #94A3B8; margin-bottom: 1rem;'>Get personalized help based on your field and emotional state</p>", unsafe_allow_html=True)
 
     # Load examples globally for sidebar & settings usage
     examples_df = []
@@ -651,12 +732,22 @@ def main():
             if use_csv_prediction and len(examples_df) > 0:
                 st.info(f"Using {len(examples_df)} saved examples for prediction")
 
-    # Run button
-    col1, col2 = st.columns([1, 5])
-    with col1:
-        run_clicked = st.button("🔍 Get AI Learning Help", type="primary", use_container_width=True)
-    with col2:
-        clear_clicked = st.button("🔄 Clear", use_container_width=False)
+    # ── Primary CTA ─────────────────────────────────────────────────────────
+    st.markdown("""
+        <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(124,58,237,0.4), transparent);
+                    margin: 1.25rem 0 1rem 0;"></div>
+    """, unsafe_allow_html=True)
+
+    btn_col, clear_col = st.columns([5, 1])
+    with btn_col:
+        run_clicked = st.button(
+            "⚡ Analyze My Emotion & Get AI Guidance",
+            type="primary",
+            use_container_width=True,
+            help="Detects your emotional state and generates personalized learning support using BiLSTM + BERT + Gemini AI"
+        )
+    with clear_col:
+        clear_clicked = st.button("↺ Clear", use_container_width=True)
 
     if clear_clicked:
         st.rerun()
